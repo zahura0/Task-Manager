@@ -7,7 +7,7 @@ export default function LoadingOverlay({ isVisible, message = 'Loading...' }: Lo
   if (!isVisible) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-white bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50" style={{ backdropFilter: 'blur(4px)' }}>
       <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-6 max-w-sm">
         {/* Animated Spinner */}
         <div className="relative w-16 h-16">

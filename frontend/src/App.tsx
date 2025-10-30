@@ -3,7 +3,6 @@ import './App.css'
 import Login from './components/Login'
 import SignUp from './components/SignUp'
 import Dashboard from './components/Dashboard'
-import Footer from './components/Footer'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'login' | 'signup' | 'dashboard'>('login')
@@ -22,15 +21,9 @@ function App() {
   return (
     <>
       {currentPage === 'login' ? (
-        <>
-          <Login setCurrentPage={setCurrentPage} onLoginSuccess={handleLoginSuccess} />
-          <Footer />
-        </>
+        <Login setCurrentPage={setCurrentPage} onLoginSuccess={handleLoginSuccess} />
       ) : currentPage === 'signup' ? (
-        <>
-          <SignUp setCurrentPage={setCurrentPage} />
-          <Footer />
-        </>
+        <SignUp setCurrentPage={setCurrentPage} />
       ) : (
         <Dashboard userName={userName} onLogout={handleLogout} />
       )}
