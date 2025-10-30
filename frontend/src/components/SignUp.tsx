@@ -3,7 +3,7 @@ import logoImg from '../assets/logo.png'
 import LoadingOverlay from './LoadingOverlay'
 
 interface SignUpProps {
-  setCurrentPage: (page: 'login' | 'signup') => void
+  setCurrentPage: (page: 'login' | 'signup' | 'dashboard') => void
 }
 
 export default function SignUp({ setCurrentPage }: SignUpProps) {

@@ -3,10 +3,11 @@ import logoImg from '../assets/logo.png'
 import LoadingOverlay from './LoadingOverlay'
 
 interface LoginProps {
-  setCurrentPage: (page: 'login' | 'signup') => void
+  setCurrentPage: (page: 'login' | 'signup' | 'dashboard') => void
+  onLoginSuccess: (name: string) => void
 }
 
-export default function Login({ setCurrentPage }: LoginProps) {
+export default function Login({ setCurrentPage, onLoginSuccess }: LoginProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -14,9 +15,11 @@ export default function Login({ setCurrentPage }: LoginProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // TODO: Add login logic here
+    // Simulate login
     setTimeout(() => {
       setIsLoading(false)
+      const userName = email.split('@')[0] // Extract name from email
+      onLoginSuccess(userName)
       console.log('Login attempt:', { email, password })
     }, 1000)
   }
