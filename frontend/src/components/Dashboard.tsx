@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import TaskColumn from './TaskColumn'
 import AddTaskModal from './AddTaskModal'
+import MoveTaskModal from './MoveTaskModal'
 import Sidebar from './Sidebar'
 import Stats from './Stats'
 import UserProfile from './UserProfile'
@@ -76,6 +77,8 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedColumn, setSelectedColumn] = useState<'todo' | 'inprogress' | 'done' | null>(null)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false)
+  const [taskToMove, setTaskToMove] = useState<{ taskId: string; fromColumnId: string } | null>(null)
 
   const handleAddTask = (columnId: 'todo' | 'inprogress' | 'done') => {
     setSelectedColumn(columnId)
@@ -115,6 +118,19 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
     setEditingTask(task)
     setSelectedColumn(columnId as 'todo' | 'inprogress' | 'done')
     setIsModalOpen(true)
+  }
+
+  const handleMoveTaskClick = (taskId: string, fromColumnId: string) => {
+    setTaskToMove({ taskId, fromColumnId })
+    setIsMoveModalOpen(true)
+  }
+
+  const handleConfirmMove = (toColumnId: string) => {
+    if (taskToMove) {
+      handleMoveTask(taskToMove.taskId, taskToMove.fromColumnId, toColumnId)
+      setIsMoveModalOpen(false)
+      setTaskToMove(null)
+    }
   }
 
   const handleMoveTask = (taskId: string, fromColumnId: string, toColumnId: string) => {
@@ -169,6 +185,7 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
                 onDeleteTask={(taskId: string) => handleDeleteTask(column.id, taskId)}
                 onEditTask={(task: Task) => handleEditTask(task, column.id)}
                 onMoveTask={(taskId: string, toColumnId: string) => handleMoveTask(taskId, column.id, toColumnId)}
+                onMoveClick={handleMoveTaskClick}
               />
             ))}
           </div>
@@ -180,6 +197,29 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
           task={editingTask}
           onSave={handleSaveTask}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {isMoveModalOpen && taskToMove && (
+        <MoveTaskModal
+          taskTitle={
+            columns
+              .find(col => col.id === taskToMove.fromColumnId)
+              ?.tasks.find(t => t.id === taskToMove.taskId)?.title || ''
+          }
+          currentColumn={
+            columns.find(col => col.id === taskToMove.fromColumnId)?.title || ''
+          }
+          columnOptions={
+            columns
+              .filter(col => col.id !== taskToMove.fromColumnId)
+              .map(col => ({ id: col.id, name: col.title }))
+          }
+          onMove={handleConfirmMove}
+          onClose={() => {
+            setIsMoveModalOpen(false)
+            setTaskToMove(null)
+          }}
         />
       )}
     </div>

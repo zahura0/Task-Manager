@@ -6,10 +6,10 @@ interface TaskCardProps {
   columnId: string
   onDelete: (taskId: string) => void
   onEdit: (task: Task) => void
-  onMove: (taskId: string, toColumnId: string) => void
+  onMoveClick?: (taskId: string, fromColumnId: string) => void
 }
 
-function TaskCard({ task, columnId, onDelete, onEdit, onMove }: TaskCardProps) {
+function TaskCard({ task, columnId, onDelete, onEdit, onMoveClick }: TaskCardProps) {
   const priorityColors: Record<string, string> = {
     low: '#4CAF50',
     medium: '#FF9800',
@@ -19,6 +19,12 @@ function TaskCard({ task, columnId, onDelete, onEdit, onMove }: TaskCardProps) {
   const getColumnOptions = () => {
     const allColumns = ['todo', 'inprogress', 'done']
     return allColumns.filter(col => col !== columnId)
+  }
+
+  const handleMoveButtonClick = () => {
+    if (onMoveClick) {
+      onMoveClick(task.id, columnId)
+    }
   }
 
   const handleDragStart = (e: React.DragEvent) => {
@@ -64,29 +70,13 @@ function TaskCard({ task, columnId, onDelete, onEdit, onMove }: TaskCardProps) {
           🗑️
         </button>
         {getColumnOptions().length > 0 && (
-          <div className="move-dropdown">
-            <button className="btn-move" title="Move task">
-              ➡️
-            </button>
-            <div className="dropdown-menu">
-              {getColumnOptions().map(columnId => {
-                const columnNames: Record<string, string> = {
-                  todo: 'To Do',
-                  inprogress: 'In Progress',
-                  done: 'Done'
-                }
-                return (
-                  <button
-                    key={columnId}
-                    onClick={() => onMove(task.id, columnId)}
-                    className="dropdown-item"
-                  >
-                    {columnNames[columnId]}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+          <button
+            className="btn-move"
+            onClick={handleMoveButtonClick}
+            title="Move task"
+          >
+            ➡️
+          </button>
         )}
       </div>
     </div>
