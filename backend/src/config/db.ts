@@ -15,7 +15,7 @@ export const connectDB = async () => {
     return mongoose.connection;
   } catch (error) {
     console.error('❌ MongoDB connection failed:', error);
-    // Don't exit process, let app continue to run
+    // Return null but don't throw - let app continue
     return null;
   }
 };

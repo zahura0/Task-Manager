@@ -31,8 +31,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB on startup
+connectDB().catch(err => console.error('Failed to connect to MongoDB:', err));
 
 // Root route - API status
 app.get('/', (req: Request, res: Response) => {
