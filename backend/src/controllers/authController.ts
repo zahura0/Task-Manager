@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User from '../models/User'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_env_secret'
+const JWT_SECRET = 'replace_this_with_env_secret'
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -42,12 +42,7 @@ export const login = async (req: Request, res: Response) => {
     const match = await bcrypt.compare(password, user.password)
     if (!match) return res.status(400).json({ message: 'Invalid credentials' })
 
-    if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET is not defined');
-      return res.status(500).json({ message: 'Server configuration error' })
-    }
-
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '5h' })
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '5h' })
 
     return res.json({ token, user: { id: user._id, fullName: user.fullName, email: user.email, role: user.role } })
   } catch (error) {
