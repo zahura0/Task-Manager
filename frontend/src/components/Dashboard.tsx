@@ -59,7 +59,6 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
   const [deleteConfirm, setDeleteConfirm] = useState<{ taskId: string; taskTitle: string; columnId: string } | null>(null)
   const [boards, setBoards] = useState<Board[]>([])
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null)
-  const [loadingBoards, setLoadingBoards] = useState(true)
 
   // Get token from localStorage
   const getAuthHeader = () => {
@@ -84,10 +83,8 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
 
       const data = await response.json()
       setBoards(data.boards || [])
-      setLoadingBoards(false)
     } catch (err) {
       console.error('Error fetching boards:', err)
-      setLoadingBoards(false)
     }
   }
 
