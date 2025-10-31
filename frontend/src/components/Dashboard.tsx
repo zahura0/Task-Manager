@@ -2,6 +2,7 @@ import { useState } from 'react'
 import TaskColumn from './TaskColumn'
 import AddTaskModal from './AddTaskModal'
 import MoveTaskModal from './MoveTaskModal'
+import ConfirmModal from './ConfirmModal'
 import Sidebar from './Sidebar'
 import Stats from './Stats'
 import UserProfile from './UserProfile'
@@ -79,6 +80,7 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false)
   const [taskToMove, setTaskToMove] = useState<{ taskId: string; fromColumnId: string } | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ taskId: string; taskTitle: string; columnId: string } | null>(null)
 
   const handleAddTask = (columnId: 'todo' | 'inprogress' | 'done') => {
     setSelectedColumn(columnId)
@@ -112,6 +114,17 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
         ? { ...col, tasks: col.tasks.filter(t => t.id !== taskId) }
         : col
     ))
+  }
+
+  const handleDeleteTaskClick = (taskId: string, taskTitle: string, columnId: string) => {
+    setDeleteConfirm({ taskId, taskTitle, columnId })
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteConfirm) {
+      handleDeleteTask(deleteConfirm.columnId, deleteConfirm.taskId)
+      setDeleteConfirm(null)
+    }
   }
 
   const handleEditTask = (task: Task, columnId: string) => {
@@ -186,6 +199,7 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
                 onEditTask={(task: Task) => handleEditTask(task, column.id)}
                 onMoveTask={(taskId: string, toColumnId: string) => handleMoveTask(taskId, column.id, toColumnId)}
                 onMoveClick={handleMoveTaskClick}
+                onDeleteClick={handleDeleteTaskClick}
               />
             ))}
           </div>
@@ -220,6 +234,18 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
             setIsMoveModalOpen(false)
             setTaskToMove(null)
           }}
+        />
+      )}
+
+      {deleteConfirm && (
+        <ConfirmModal
+          title="Delete Task"
+          message={`Are you sure you want to delete "${deleteConfirm.taskTitle}"? This action cannot be undone.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
+          isDangerous={true}
         />
       )}
     </div>

@@ -7,9 +7,10 @@ interface TaskCardProps {
   onDelete: (taskId: string) => void
   onEdit: (task: Task) => void
   onMoveClick?: (taskId: string, fromColumnId: string) => void
+  onDeleteClick?: (taskId: string, taskTitle: string) => void
 }
 
-function TaskCard({ task, columnId, onDelete, onEdit, onMoveClick }: TaskCardProps) {
+function TaskCard({ task, columnId, onDelete, onEdit, onMoveClick, onDeleteClick }: TaskCardProps) {
   const priorityColors: Record<string, string> = {
     low: '#4CAF50',
     medium: '#FF9800',
@@ -31,6 +32,12 @@ function TaskCard({ task, columnId, onDelete, onEdit, onMoveClick }: TaskCardPro
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('taskId', task.id)
     e.dataTransfer.setData('fromColumnId', columnId)
+  }
+
+  const handleDeleteClick = () => {
+    if (onDeleteClick) {
+      onDeleteClick(task.id, task.title)
+    }
   }
 
   return (
@@ -66,7 +73,7 @@ function TaskCard({ task, columnId, onDelete, onEdit, onMoveClick }: TaskCardPro
         <button className="btn-edit" onClick={() => onEdit(task)} title="Edit task">
           ✏️
         </button>
-        <button className="btn-delete" onClick={() => onDelete(task.id)} title="Delete task">
+        <button className="btn-delete" onClick={handleDeleteClick} title="Delete task">
           🗑️
         </button>
         {getColumnOptions().length > 0 && (

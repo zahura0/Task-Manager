@@ -9,6 +9,7 @@ interface TaskColumnProps {
   onEditTask: (task: Task) => void
   onMoveTask: (taskId: string, toColumnId: string) => void
   onMoveClick?: (taskId: string, fromColumnId: string) => void
+  onDeleteClick?: (taskId: string, taskTitle: string, columnId: string) => void
 }
 
 function TaskColumn({
@@ -17,7 +18,8 @@ function TaskColumn({
   onDeleteTask,
   onEditTask,
   onMoveTask,
-  onMoveClick
+  onMoveClick,
+  onDeleteClick
 }: TaskColumnProps) {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -53,6 +55,7 @@ function TaskColumn({
             onDelete={onDeleteTask}
             onEdit={onEditTask}
             onMoveClick={onMoveClick}
+            onDeleteClick={onDeleteClick ? (taskId, taskTitle) => onDeleteClick(taskId, taskTitle, column.id) : undefined}
           />
         ))}
         {column.tasks.length === 0 && (
