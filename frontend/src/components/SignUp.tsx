@@ -39,11 +39,25 @@ export default function SignUp({ setCurrentPage }: SignUpProps) {
     }
 
     setIsLoading(true)
-    // TODO: Add sign up logic here
-    setTimeout(() => {
-      setIsLoading(false)
-      console.log('Sign up attempt:', formData)
-    }, 1000)
+      // Call backend register (use Vite env variable if provided)
+      const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000'
+      // Example: VITE_API_URL=http://localhost:3001
+      fetch(`${API_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fullName: formData.fullName, email: formData.email, password: formData.password })
+    })
+      .then(async (res) => {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.message || 'Registration failed')
+        setIsLoading(false)
+        // Registration successful — redirect to login page
+        setCurrentPage('login')
+      })
+      .catch((err) => {
+        setIsLoading(false)
+        setError(err.message || 'Registration failed')
+      })
   }
 
   const handleGoogleSignUp = () => {

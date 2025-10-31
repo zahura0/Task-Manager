@@ -11,17 +11,31 @@ export default function Login({ setCurrentPage, onLoginSuccess }: LoginProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false)
-      const userName = email.split('@')[0] // Extract name from email
-      onLoginSuccess(userName)
-      console.log('Login attempt:', { email, password })
-    }, 1000)
+    // Call backend login
+    const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000'
+    // Example: set VITE_API_URL=http://localhost:3001 in your .env
+    fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+      .then(async (res) => {
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.message || 'Login failed')
+        // Save token and notify parent
+        if (data.token) localStorage.setItem('tm_token', data.token)
+        const name = data.user?.fullName || email.split('@')[0]
+        onLoginSuccess(name)
+      })
+      .catch((err) => {
+        setError(err.message || 'Login failed')
+      })
+      .finally(() => setIsLoading(false))
   }
 
   return (
@@ -84,6 +98,13 @@ export default function Login({ setCurrentPage, onLoginSuccess }: LoginProps) {
                 Forgot password?
               </a>
             </div>
+
+            {/* Error */}
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-700 text-sm font-medium">{error}</p>
+              </div>
+            )}
 
             {/* Login Button */}
             <button

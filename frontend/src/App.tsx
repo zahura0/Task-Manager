@@ -14,6 +14,8 @@ function App() {
   }
 
   const handleLogout = () => {
+    // Clear stored token and reset to login
+    localStorage.removeItem('tm_token')
     setUserName('')
     setCurrentPage('login')
   }

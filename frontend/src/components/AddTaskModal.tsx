@@ -21,8 +21,22 @@ function AddTaskModal({ task, onSave, onClose }: AddTaskModalProps) {
 
   useEffect(() => {
     if (task) {
-      const { id, ...taskData } = task
-      setFormData(taskData)
+      const { id, _id, ...taskData } = task
+      
+      // Format dueDate for date input (YYYY-MM-DD format)
+      let formattedDueDate = ''
+      if (taskData.dueDate) {
+        const date = new Date(taskData.dueDate)
+        formattedDueDate = date.toISOString().split('T')[0]
+      }
+      
+      setFormData({
+        title: taskData.title || '',
+        description: taskData.description || '',
+        dueDate: formattedDueDate,
+        assignee: taskData.assignee || '',
+        priority: taskData.priority || 'medium'
+      })
     } else {
       setFormData({
         title: '',
@@ -37,16 +51,16 @@ function AddTaskModal({ task, onSave, onClose }: AddTaskModalProps) {
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.title.trim()) {
+    if (!(formData.title || '').trim()) {
       newErrors.title = 'Title is required'
     }
-    if (!formData.description.trim()) {
+    if (!(formData.description || '').trim()) {
       newErrors.description = 'Description is required'
     }
     if (!formData.dueDate) {
       newErrors.dueDate = 'Due date is required'
     }
-    if (!formData.assignee.trim()) {
+    if (!(formData.assignee || '').trim()) {
       newErrors.assignee = 'Assignee is required'
     }
 
