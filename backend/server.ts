@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './src/config/db';
 import authRoutes from './src/routes/authRoutes';
 import taskRoutes from './src/routes/taskRoutes';
+import boardRoutes from './src/routes/boardRoutes';
 
 dotenv.config();
 
@@ -29,6 +30,9 @@ connectDB();
 
 // Auth routes
 app.use('/api/auth', authRoutes)
+
+// Board routes (protected)
+app.use('/api/boards', boardRoutes)
 
 // Task routes (protected)
 app.use('/api/tasks', taskRoutes)

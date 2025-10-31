@@ -1,9 +1,11 @@
 import { Request, Response } from 'express'
 import Task from '../models/Task'
+import Board from '../models/Board'
+import mongoose from 'mongoose'
 
 export const createTask = async (req: Request, res: Response) => {
   try {
-    const { title, description, status, priority, assignee, dueDate } = req.body
+    const { title, description, status, priority, assignee, dueDate, boardId } = req.body
     const userId = req.userId
 
     if (!title) {
@@ -17,7 +19,8 @@ export const createTask = async (req: Request, res: Response) => {
       priority: priority || 'medium',
       assignee: assignee || '',
       dueDate: dueDate || null,
-      userId
+      userId,
+      boardId: boardId || null
     })
 
     await task.save()
@@ -35,10 +38,18 @@ export const createTask = async (req: Request, res: Response) => {
 export const getTasks = async (req: Request, res: Response) => {
   try {
     const userId = req.userId
-    const { status, priority } = req.query
+    const { status, priority, boardId } = req.query
 
     // Build filter object
     const filter: any = { userId }
+    
+    // If boardId is provided, filter by it; otherwise exclude board tasks
+    if (boardId) {
+      filter.boardId = boardId
+    } else {
+      filter.boardId = null
+    }
+    
     if (status) filter.status = status
     if (priority) filter.priority = priority
 
@@ -57,17 +68,28 @@ export const getTasks = async (req: Request, res: Response) => {
 export const updateTask = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const { title, description, status, priority, assignee, dueDate } = req.body
+    const { title, description, status, priority, assignee, dueDate, boardId } = req.body
     const userId = req.userId
 
-    // Find task and verify ownership
+    // Find task and verify ownership or board membership
     const task = await Task.findById(id)
     if (!task) {
       return res.status(404).json({ message: 'Task not found' })
     }
 
-    if (task.userId.toString() !== userId) {
-      return res.status(403).json({ message: 'Not authorized to update this task' })
+    // Check if user is task owner
+    const isOwner = task.userId.toString() === userId
+
+    // If not owner, check if it's a board task and user is a board member
+    if (!isOwner) {
+      if (task.boardId) {
+        const board = await Board.findById(task.boardId)
+        if (!board || !board.members.includes(new mongoose.Types.ObjectId(userId))) {
+          return res.status(403).json({ message: 'Not authorized to update this task' })
+        }
+      } else {
+        return res.status(403).json({ message: 'Not authorized to update this task' })
+      }
     }
 
     // Update fields if provided
@@ -77,6 +99,7 @@ export const updateTask = async (req: Request, res: Response) => {
     if (priority !== undefined) task.priority = priority
     if (assignee !== undefined) task.assignee = assignee
     if (dueDate !== undefined) task.dueDate = dueDate
+    if (boardId !== undefined) task.boardId = boardId
 
     await task.save()
 
@@ -95,14 +118,25 @@ export const deleteTask = async (req: Request, res: Response) => {
     const { id } = req.params
     const userId = req.userId
 
-    // Find task and verify ownership
+    // Find task and verify ownership or board membership
     const task = await Task.findById(id)
     if (!task) {
       return res.status(404).json({ message: 'Task not found' })
     }
 
-    if (task.userId.toString() !== userId) {
-      return res.status(403).json({ message: 'Not authorized to delete this task' })
+    // Check if user is task owner
+    const isOwner = task.userId.toString() === userId
+
+    // If not owner, check if it's a board task and user is a board member
+    if (!isOwner) {
+      if (task.boardId) {
+        const board = await Board.findById(task.boardId)
+        if (!board || !board.members.includes(new mongoose.Types.ObjectId(userId))) {
+          return res.status(403).json({ message: 'Not authorized to delete this task' })
+        }
+      } else {
+        return res.status(403).json({ message: 'Not authorized to delete this task' })
+      }
     }
 
     await Task.deleteOne({ _id: id })

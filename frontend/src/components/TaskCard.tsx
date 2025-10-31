@@ -60,12 +60,14 @@ function TaskCard({ task, columnId, onEdit, onMoveClick, onDeleteClick }: TaskCa
       <div className="task-meta">
         <div className="meta-item">
           <span className="meta-label">👤</span>
-          <span>{task.assignee}</span>
+          <span>{task.assignee || 'Unassigned'}</span>
         </div>
-        <div className="meta-item">
-          <span className="meta-label">📅</span>
-          <span>{new Date(task.dueDate).toLocaleDateString()}</span>
-        </div>
+        {task.dueDate && (
+          <div className="meta-item">
+            <span className="meta-label">📅</span>
+            <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+          </div>
+        )}
       </div>
 
       <div className="task-actions">

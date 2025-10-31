@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import logoImg from '../assets/logo.png'
 import LoadingOverlay from './LoadingOverlay'
 
@@ -10,8 +10,22 @@ interface LoginProps {
 export default function Login({ setCurrentPage, onLoginSuccess }: LoginProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Load saved email and password if "Remember Me" was checked
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('tm_remember_email')
+    const savedPassword = localStorage.getItem('tm_remember_password')
+    const wasRemembered = localStorage.getItem('tm_remember_me') === 'true'
+
+    if (wasRemembered && savedEmail && savedPassword) {
+      setEmail(savedEmail)
+      setPassword(savedPassword)
+      setRememberMe(true)
+    }
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,6 +44,19 @@ export default function Login({ setCurrentPage, onLoginSuccess }: LoginProps) {
         // Save token and notify parent
         if (data.token) localStorage.setItem('tm_token', data.token)
         const name = data.user?.fullName || email.split('@')[0]
+        
+        // Handle "Remember Me" checkbox
+        if (rememberMe) {
+          localStorage.setItem('tm_remember_email', email)
+          localStorage.setItem('tm_remember_password', password)
+          localStorage.setItem('tm_remember_me', 'true')
+        } else {
+          // Clear saved credentials if "Remember Me" is unchecked
+          localStorage.removeItem('tm_remember_email')
+          localStorage.removeItem('tm_remember_password')
+          localStorage.removeItem('tm_remember_me')
+        }
+        
         onLoginSuccess(name)
       })
       .catch((err) => {
@@ -91,7 +118,12 @@ export default function Login({ setCurrentPage, onLoginSuccess }: LoginProps) {
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 accent-purple-600 rounded" />
+                <input 
+                  type="checkbox" 
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 accent-purple-600 rounded" 
+                />
                 <span className="ml-2 text-gray-700">Remember me</span>
               </label>
               <a href="#" className="text-purple-600 hover:text-purple-700 font-medium">

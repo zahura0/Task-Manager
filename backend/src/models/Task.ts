@@ -8,6 +8,7 @@ export interface ITask extends Document {
   assignee?: string
   dueDate?: Date
   userId: mongoose.Types.ObjectId
+  boardId?: mongoose.Types.ObjectId
   createdAt: Date
   updatedAt: Date
 }
@@ -21,6 +22,7 @@ const TaskSchema: Schema = new Schema<ITask>(
     assignee: { type: String, default: '' },
     dueDate: { type: Date, default: null },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    boardId: { type: Schema.Types.ObjectId, ref: 'Board', default: null }
   },
   { timestamps: true }
 )

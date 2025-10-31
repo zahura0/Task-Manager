@@ -18,6 +18,8 @@ export interface Task {
   priority: 'low' | 'medium' | 'high'
   status?: 'todo' | 'inprogress' | 'done'
   _id?: string
+  isOwner?: boolean
+  userId?: any
 }
 
 export interface Column {
@@ -26,14 +28,23 @@ export interface Column {
   tasks: Task[]
 }
 
+export interface Board {
+  _id: string
+  name: string
+  description?: string
+  creator: any
+  members: any[]
+}
+
 interface DashboardProps {
   userName?: string
   onLogout?: () => void
+  onAddToast?: (message: string, type?: 'success' | 'error' | 'info', duration?: number) => void
 }
 
 const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000'
 
-function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
+function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => {} }: DashboardProps) {
   const [columns, setColumns] = useState<Column[]>([
     { id: 'todo', title: 'To Do', tasks: [] },
     { id: 'inprogress', title: 'In Progress', tasks: [] },
@@ -46,6 +57,9 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false)
   const [taskToMove, setTaskToMove] = useState<{ taskId: string; fromColumnId: string } | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ taskId: string; taskTitle: string; columnId: string } | null>(null)
+  const [boards, setBoards] = useState<Board[]>([])
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null)
+  const [loadingBoards, setLoadingBoards] = useState(true)
 
   // Get token from localStorage
   const getAuthHeader = () => {
@@ -56,10 +70,37 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
     }
   }
 
-  // Fetch tasks from database
-  const fetchTasks = async () => {
+  // Fetch boards for the user
+  const fetchBoards = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/tasks`, {
+      const response = await fetch(`${API_URL}/api/boards`, {
+        method: 'GET',
+        headers: getAuthHeader()
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch boards')
+      }
+
+      const data = await response.json()
+      setBoards(data.boards || [])
+      setLoadingBoards(false)
+    } catch (err) {
+      console.error('Error fetching boards:', err)
+      setLoadingBoards(false)
+    }
+  }
+
+  // Fetch tasks from database
+  const fetchTasks = async (boardId?: string) => {
+    try {
+      // If boardId is provided, fetch board tasks; otherwise fetch personal tasks
+      let url = `${API_URL}/api/tasks`
+      if (boardId) {
+        url = `${API_URL}/api/boards/${boardId}/tasks`
+      }
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: getAuthHeader()
       })
@@ -92,8 +133,18 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
 
   // Load tasks on component mount
   useEffect(() => {
+    fetchBoards()
     fetchTasks()
   }, [])
+
+  // Fetch tasks when board selection changes
+  useEffect(() => {
+    if (selectedBoardId) {
+      fetchTasks(selectedBoardId)
+    } else {
+      fetchTasks()
+    }
+  }, [selectedBoardId])
 
   const handleAddTask = (columnId: 'todo' | 'inprogress' | 'done') => {
     setSelectedColumn(columnId)
@@ -114,7 +165,8 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
             priority: task.priority,
             assignee: task.assignee,
             dueDate: task.dueDate,
-            status: selectedColumn
+            status: selectedColumn,
+            boardId: selectedBoardId || undefined
           })
         })
 
@@ -123,7 +175,12 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
         }
 
         // Refresh tasks from DB
-        await fetchTasks()
+        if (selectedBoardId) {
+          await fetchTasks(selectedBoardId)
+        } else {
+          await fetchTasks()
+        }
+        onAddToast('Task updated successfully! ✓', 'success', 2000)
       } else {
         // Add new task
         if (!selectedColumn) return
@@ -137,7 +194,8 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
             priority: task.priority,
             assignee: task.assignee,
             dueDate: task.dueDate,
-            status: selectedColumn
+            status: selectedColumn,
+            boardId: selectedBoardId || undefined
           })
         })
 
@@ -146,13 +204,18 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
         }
 
         // Refresh tasks from DB
-        await fetchTasks()
+        if (selectedBoardId) {
+          await fetchTasks(selectedBoardId)
+        } else {
+          await fetchTasks()
+        }
+        onAddToast('Task created successfully! ✓', 'success', 2000)
       }
 
       setIsModalOpen(false)
     } catch (err) {
       console.error('Error saving task:', err)
-      alert('Failed to save task')
+      onAddToast('Failed to save task', 'error', 3000)
     }
   }
 
@@ -173,10 +236,15 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
       }
 
       // Refresh tasks from DB
-      await fetchTasks()
+      if (selectedBoardId) {
+        await fetchTasks(selectedBoardId)
+      } else {
+        await fetchTasks()
+      }
+      onAddToast('Task deleted successfully! ✓', 'success', 2000)
     } catch (err) {
       console.error('Error deleting task:', err)
-      alert('Failed to delete task')
+      onAddToast('Failed to delete task', 'error', 3000)
     }
   }
 
@@ -227,14 +295,19 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
           }
 
           // Refresh tasks from DB
-          await fetchTasks()
+          if (selectedBoardId) {
+            await fetchTasks(selectedBoardId)
+          } else {
+            await fetchTasks()
+          }
+          onAddToast('Task moved successfully! ✓', 'success', 2000)
         }
 
         setIsMoveModalOpen(false)
         setTaskToMove(null)
       } catch (err) {
         console.error('Error moving task:', err)
-        alert('Failed to move task')
+        onAddToast('Failed to move task', 'error', 3000)
       }
     }
   }
@@ -255,6 +328,20 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
         <div className="header-left">
           <h1>📋 Task Dashboard</h1>
           <p className="subtitle">Organize your team's work like a pro</p>
+        </div>
+        <div className="header-board-selector">
+          <select 
+            value={selectedBoardId || ''} 
+            onChange={(e) => setSelectedBoardId(e.target.value || null)}
+            className="board-select"
+          >
+            <option value="">📌 Personal Tasks</option>
+            {boards.map(board => (
+              <option key={board._id} value={board._id}>
+                👥 {board.name}
+              </option>
+            ))}
+          </select>
         </div>
         <UserProfile userName={userName} onLogout={onLogout} />
       </header>
