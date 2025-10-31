@@ -117,7 +117,7 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
       // Group tasks by status
       const groupedColumns = [
         { id: 'todo' as const, title: 'To Do', tasks: mappedTasks.filter((t: any) => t.status === 'todo') },
-        { id: 'inprogress' as const, title: 'In Progress', tasks: mappedTasks.filter((t: any) => t.status === 'in-progress') },
+        { id: 'inprogress' as const, title: 'In Progress', tasks: mappedTasks.filter((t: any) => t.status === 'inprogress') },
         { id: 'done' as const, title: 'Done', tasks: mappedTasks.filter((t: any) => t.status === 'done') }
       ]
 
@@ -282,6 +282,8 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
               title: task.title,
               description: task.description,
               priority: task.priority,
+              assignee: task.assignee,
+              dueDate: task.dueDate,
               status: toColumnId
             })
           })
