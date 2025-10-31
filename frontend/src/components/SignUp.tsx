@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import logoImg from '../assets/logo.png'
 import LoadingOverlay from './LoadingOverlay'
+import { getApiEndpoint } from '../utils/api'
 
 interface SignUpProps {
   setCurrentPage: (page: 'login' | 'signup' | 'dashboard') => void
@@ -40,9 +41,8 @@ export default function SignUp({ setCurrentPage }: SignUpProps) {
 
     setIsLoading(true)
       // Call backend register (use Vite env variable if provided)
-      const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000'
-      // Example: VITE_API_URL=http://localhost:3001
-      fetch(`${API_URL}/api/auth/register`, {
+      const url = getApiEndpoint('/api/auth/register')
+      fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fullName: formData.fullName, email: formData.email, password: formData.password })

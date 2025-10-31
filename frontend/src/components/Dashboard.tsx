@@ -7,6 +7,7 @@ import Sidebar from './Sidebar'
 import Stats from './Stats'
 import UserProfile from './UserProfile'
 import logoImg from '../assets/logo.png'
+import { getApiEndpoint } from '../utils/api'
 import '../styles/Dashboard.css'
 
 export interface Task {
@@ -42,8 +43,6 @@ interface DashboardProps {
   onAddToast?: (message: string, type?: 'success' | 'error' | 'info', duration?: number) => void
 }
 
-const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000'
-
 function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => {} }: DashboardProps) {
   const [columns, setColumns] = useState<Column[]>([
     { id: 'todo', title: 'To Do', tasks: [] },
@@ -72,7 +71,7 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
   // Fetch boards for the user
   const fetchBoards = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/boards`, {
+      const response = await fetch(getApiEndpoint('/api/boards'), {
         method: 'GET',
         headers: getAuthHeader()
       })
@@ -92,9 +91,9 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
   const fetchTasks = async (boardId?: string) => {
     try {
       // If boardId is provided, fetch board tasks; otherwise fetch personal tasks
-      let url = `${API_URL}/api/tasks`
+      let url = getApiEndpoint('/api/tasks')
       if (boardId) {
-        url = `${API_URL}/api/boards/${boardId}/tasks`
+        url = getApiEndpoint(`/api/boards/${boardId}/tasks`)
       }
 
       const response = await fetch(url, {
@@ -153,7 +152,7 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
     try {
       if (editingTask) {
         // Update existing task
-        const response = await fetch(`${API_URL}/api/tasks/${editingTask._id || editingTask.id}`, {
+        const response = await fetch(getApiEndpoint(`/api/tasks/${editingTask._id || editingTask.id}`), {
           method: 'PUT',
           headers: getAuthHeader(),
           body: JSON.stringify({
@@ -182,7 +181,7 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
         // Add new task
         if (!selectedColumn) return
 
-        const response = await fetch(`${API_URL}/api/tasks`, {
+        const response = await fetch(getApiEndpoint('/api/tasks'), {
           method: 'POST',
           headers: getAuthHeader(),
           body: JSON.stringify({
@@ -223,7 +222,7 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
         return
       }
 
-      const response = await fetch(`${API_URL}/api/tasks/${taskId}`, {
+      const response = await fetch(getApiEndpoint(`/api/tasks/${taskId}`), {
         method: 'DELETE',
         headers: getAuthHeader()
       })
@@ -276,7 +275,7 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
           ?.tasks.find(t => t.id === taskToMove.taskId || t._id === taskToMove.taskId)
 
         if (task) {
-          const response = await fetch(`${API_URL}/api/tasks/${task._id || task.id}`, {
+          const response = await fetch(getApiEndpoint(`/api/tasks/${task._id || task.id}`), {
             method: 'PUT',
             headers: getAuthHeader(),
             body: JSON.stringify({

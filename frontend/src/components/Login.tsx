@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import logoImg from '../assets/logo.png'
 import LoadingOverlay from './LoadingOverlay'
+import { getApiEndpoint } from '../utils/api'
 
 interface LoginProps {
   setCurrentPage: (page: 'login' | 'signup' | 'dashboard') => void
@@ -31,9 +32,8 @@ export default function Login({ setCurrentPage, onLoginSuccess }: LoginProps) {
     e.preventDefault()
     setIsLoading(true)
     // Call backend login
-    const API_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000'
-    // Example: set VITE_API_URL=http://localhost:3001 in your .env
-    fetch(`${API_URL}/api/auth/login`, {
+    const url = getApiEndpoint('/api/auth/login')
+    fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
