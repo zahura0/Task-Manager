@@ -42,10 +42,12 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ message: '✅ Backend is running', timestamp: new Date() });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📝 API Health: http://localhost:${PORT}/api/health`);
-});
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`📝 API Health: http://localhost:${PORT}/api/health`);
+  });
+}
 
 export default app;
