@@ -24,8 +24,8 @@ app.use((req, res, next) => {
   next()
 })
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (non-blocking, don't await here)
+connectDB().catch(err => console.error('DB Connection Error:', err));
 
 // Root route - API status with success message
 app.get('/', (req: Request, res: Response) => {
