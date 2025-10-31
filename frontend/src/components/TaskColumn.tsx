@@ -5,7 +5,6 @@ import '../styles/TaskColumn.css'
 interface TaskColumnProps {
   column: Column
   onAddTask: () => void
-  onDeleteTask: (taskId: string) => void
   onEditTask: (task: Task) => void
   onMoveTask: (taskId: string, toColumnId: string) => void
   onMoveClick?: (taskId: string, fromColumnId: string) => void
@@ -15,7 +14,6 @@ interface TaskColumnProps {
 function TaskColumn({
   column,
   onAddTask,
-  onDeleteTask,
   onEditTask,
   onMoveTask,
   onMoveClick,
@@ -52,7 +50,6 @@ function TaskColumn({
             key={task.id}
             task={task}
             columnId={column.id}
-            onDelete={onDeleteTask}
             onEdit={onEditTask}
             onMoveClick={onMoveClick}
             onDeleteClick={onDeleteClick ? (taskId, taskTitle) => onDeleteClick(taskId, taskTitle, column.id) : undefined}

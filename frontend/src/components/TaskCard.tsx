@@ -4,13 +4,12 @@ import '../styles/TaskCard.css'
 interface TaskCardProps {
   task: Task
   columnId: string
-  onDelete: (taskId: string) => void
   onEdit: (task: Task) => void
   onMoveClick?: (taskId: string, fromColumnId: string) => void
   onDeleteClick?: (taskId: string, taskTitle: string) => void
 }
 
-function TaskCard({ task, columnId, onDelete, onEdit, onMoveClick, onDeleteClick }: TaskCardProps) {
+function TaskCard({ task, columnId, onEdit, onMoveClick, onDeleteClick }: TaskCardProps) {
   const priorityColors: Record<string, string> = {
     low: '#4CAF50',
     medium: '#FF9800',

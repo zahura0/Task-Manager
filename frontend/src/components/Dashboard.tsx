@@ -195,7 +195,6 @@ function Dashboard({ userName = 'User', onLogout = () => {} }: DashboardProps) {
                 key={column.id}
                 column={column}
                 onAddTask={() => handleAddTask(column.id)}
-                onDeleteTask={(taskId: string) => handleDeleteTask(column.id, taskId)}
                 onEditTask={(task: Task) => handleEditTask(task, column.id)}
                 onMoveTask={(taskId: string, toColumnId: string) => handleMoveTask(taskId, column.id, toColumnId)}
                 onMoveClick={handleMoveTaskClick}
