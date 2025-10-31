@@ -28,6 +28,22 @@ app.use((req, res, next) => {
 // Connect to MongoDB
 connectDB();
 
+// Root route - API status
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    message: '✅ Task Manager Backend API is working!',
+    version: '1.0.0',
+    status: 'online',
+    timestamp: new Date(),
+    endpoints: {
+      auth: '/api/auth',
+      boards: '/api/boards',
+      tasks: '/api/tasks',
+      health: '/api/health'
+    }
+  });
+});
+
 // Auth routes
 app.use('/api/auth', authRoutes)
 
@@ -39,7 +55,13 @@ app.use('/api/tasks', taskRoutes)
 
 // Health check route
 app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ message: '✅ Backend is running', timestamp: new Date() });
+  res.json({
+    message: '✅ Task Manager Backend API is working!',
+    status: 'healthy',
+    timestamp: new Date(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 // For local development
