@@ -24,7 +24,7 @@ export interface Task {
 }
 
 export interface Column {
-  id: 'todo' | 'inprogress' | 'done'
+  id: 'todo' | 'in-progress' | 'done'
   title: string
   tasks: Task[]
 }
@@ -46,12 +46,12 @@ interface DashboardProps {
 function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => {} }: DashboardProps) {
   const [columns, setColumns] = useState<Column[]>([
     { id: 'todo', title: 'To Do', tasks: [] },
-    { id: 'inprogress', title: 'In Progress', tasks: [] },
+    { id: 'in-progress', title: 'In Progress', tasks: [] },
     { id: 'done', title: 'Done', tasks: [] }
   ])
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedColumn, setSelectedColumn] = useState<'todo' | 'inprogress' | 'done' | null>(null)
+  const [selectedColumn, setSelectedColumn] = useState<'todo' | 'in-progress' | 'done' | null>(null)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false)
   const [taskToMove, setTaskToMove] = useState<{ taskId: string; fromColumnId: string } | null>(null)
@@ -117,7 +117,7 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
       // Group tasks by status
       const groupedColumns = [
         { id: 'todo' as const, title: 'To Do', tasks: mappedTasks.filter((t: any) => t.status === 'todo') },
-        { id: 'inprogress' as const, title: 'In Progress', tasks: mappedTasks.filter((t: any) => t.status === 'inprogress') },
+        { id: 'in-progress' as const, title: 'In Progress', tasks: mappedTasks.filter((t: any) => t.status === 'in-progress') },
         { id: 'done' as const, title: 'Done', tasks: mappedTasks.filter((t: any) => t.status === 'done') }
       ]
 
@@ -142,7 +142,7 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
     }
   }, [selectedBoardId])
 
-  const handleAddTask = (columnId: 'todo' | 'inprogress' | 'done') => {
+  const handleAddTask = (columnId: 'todo' | 'in-progress' | 'done') => {
     setSelectedColumn(columnId)
     setEditingTask(null)
     setIsModalOpen(true)
@@ -257,7 +257,7 @@ function Dashboard({ userName = 'User', onLogout = () => {}, onAddToast = () => 
 
   const handleEditTask = (task: Task, columnId: string) => {
     setEditingTask(task)
-    setSelectedColumn(columnId as 'todo' | 'inprogress' | 'done')
+    setSelectedColumn(columnId as 'todo' | 'in-progress' | 'done')
     setIsModalOpen(true)
   }
 
