@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from 'express';
+import cors, { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './src/config/db';
 import authRoutes from './src/routes/authRoutes';
@@ -10,33 +11,24 @@ dotenv.config();
 const app: Express = express();
 const PORT = 5000;
 const ALLOWED_ORIGINS = ['https://example.com'];
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+};
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // CORS middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  }
-
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
-      return res.sendStatus(403);
-    }
-    return res.sendStatus(200);
-  }
-
-  next();
-});
+app.use(cors(corsOptions));
 
 // Connect to MongoDB on startup
 connectDB().catch(err => console.error('Failed to connect to MongoDB:', err));
