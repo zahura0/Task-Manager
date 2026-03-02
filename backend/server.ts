@@ -9,6 +9,7 @@ dotenv.config();
 
 const app: Express = express();
 const PORT = 5000;
+const ALLOWED_ORIGINS = ['https://example.com'];
 
 // Middleware
 app.use(express.json());
@@ -17,17 +18,23 @@ app.use(express.urlencoded({ extended: true }));
 // CORS middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  
-  // Allow all origins (can be restricted later)
-  res.header('Access-Control-Allow-Origin', origin || '*');
-  res.header('Access-Control-Allow-Credentials', 'true');
+
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  
+
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
+    if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+      return res.sendStatus(403);
+    }
     return res.sendStatus(200);
   }
+
   next();
 });
 
